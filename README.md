@@ -49,6 +49,7 @@ The program should:
 The following files and folder are part of the project:
 
 - README.md : current file
+- pom.xml : Maven project main file
 - src/main/java :  Source files of the code.
 - src/main/resources :  Sample input json file
 - src/test/java :  Source files for the JUNIT5 unit tests
@@ -56,16 +57,28 @@ The following files and folder are part of the project:
 
 ### Prerequisites
 
-You will need maven version 3.6.3 or higher to be able to compile and run this application
+You will need maven version 3.6.3+ and jdk11 to be able to compile and run this application.
 
 ### Installing
 
-Build the application and run the JUnit5 unit tests, from the root folder:
+After cloning the project, open a commandline at the main folder that contains project pom.xml file and build the application by using following commands:
+
 
 ```
 mvn clean
 mvn compile
 mvn package
+```
+
+### Logger Initialization
+
+For logger type, logback implementation is used and set "DEBUG" log level by default. 
+If one wants to change the log level, one can find _"src/main/resources/logback.xml"_ file and change the following part as _"debug, trace or info"_:
+
+```
+    <root level="debug">
+        <appender-ref ref="LogFileAnalyzer" />
+    </root>
 ```
 
 ## Executing the application
@@ -85,8 +98,6 @@ java -jar target/LogFileAnalyzer-1.0-SNAPSHOT.jar C:\Workspace\LogFileAnalyzer\l
 
 Note:
 	The input file must exist
-
-If the input path does not exist FilePathInvalidException will be raised.
 
 ## Expected output
 
