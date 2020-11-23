@@ -5,6 +5,7 @@ import Event.EventLog;
 import Event.EventLogFileDto;
 import Exception.DatabaseInsertException;
 import Exception.LogFileProcessException;
+import Exception.ParameterInvalidException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,8 +24,30 @@ import static Processor.ProcessorEnums.State.STARTED;
 @Component
 public class Processor implements CommandLineRunner {
 
+    //region Private Members
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private JSONParser jsonParser;
+    private final Logger logger;
+    private final EventDao eventDao;
+
+    private final Map<String, EventLogFileDto> startedMap = new ConcurrentHashMap<>();
+    private final Map<String, EventLogFileDto> finishedMap = new ConcurrentHashMap<>();
+    //endregion
+
+    //region Constructor
+    @Autowired
+    public Processor(EventDao eventDao, Logger logger) {
+        this.eventDao = eventDao;
+        this.logger = logger;
+    }
+
+    //endregion
+
+    //region Main Method
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) throws IOException, LogFileProcessException, ParameterInvalidException {
 
         try {
             logger.info("Application started...");
@@ -37,47 +57,62 @@ public class Processor implements CommandLineRunner {
             ProcessLogFile(params);
             ProcessEventData(startedMap.keySet());
             logger.info("Application finished...");
-        } catch (Exception ex) {
+
+        } catch (NullPointerException ex) {
+            logger.error("File is not found!", ex);
+            throw ex;
+        } catch (LogFileProcessException ex) {
+            logger.error("File could not be processed!", ex);
+            throw new LogFileProcessException(ex);
+        } catch (ParameterInvalidException ex) {
+            logger.error("Application parameters are invalid! Exception: " + ex);
+            throw new ParameterInvalidException(ex);
+        } catch (FileNotFoundException ex) {
             logger.error("Application finished with error. Exception: " + ex);
+            throw ex;
         }
     }
 
-    @Autowired
-    public Processor(EventDao eventDao, Logger logger) {
-        this.eventDao = eventDao;
-        this.logger = logger;
-    }
+    //endregion
 
-
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private JSONParser jsonParser;
-    private final Logger logger;
-    private final EventDao eventDao;
-
-    private final Map<String, EventLogFileDto> startedMap = new ConcurrentHashMap<>();
-    private final Map<String, EventLogFileDto> finishedMap = new ConcurrentHashMap<>();
-
-    private void ProcessLogFile(ProcessorParams processorParams) {
+    //region Private Methods
+    private void ProcessLogFile(ProcessorParams processorParams) throws LogFileProcessException, NullPointerException, IOException {
 
         try {
 
-            logger.info("Log file processing step is started...");
-            File file = new File(processorParams.getFilePath());
-            logger.debug("Log file processing step is started...");
+            File file = GetTestFile(processorParams.getFilePath());
             Reader is = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(is);
-
             String currentLine;
             while ((currentLine = bufferedReader.readLine()) != null) {
                 ProcessCurrentLine(currentLine);
             }
 
+        } catch (NullPointerException | FileNotFoundException | LogFileProcessException ex) {
+            logger.error("ProcessLogFile method finished with error error!", ex);
+            throw ex;
         } catch (Exception ex) {
             logger.error("Failure reading the file, exiting...", ex);
-            throw new LogFileProcessException(ex);
+            throw ex;
         }
 
 
+    }
+
+
+    private File GetTestFile(String path) throws NullPointerException {
+
+        File file;
+        try {
+            logger.info("Log file processing step is started...");
+            file = new File(path);
+            logger.debug("Log file processing step is started...");
+
+        } catch (NullPointerException ex) {
+            throw ex;
+        }
+
+        return file;
     }
 
     private void ProcessCurrentLine(String currentLine) {
@@ -127,6 +162,8 @@ public class Processor implements CommandLineRunner {
         logger.info("EventLog is converted. Duration: " + duration + ", Alert: " + isAlert);
         return new EventLog(startEvent.getId(), duration, startEvent.getType(), startEvent.getHost(), isAlert);
     }
+
+    //endregion
 
 
 }

@@ -40,15 +40,8 @@ public class ApplicationConfiguration {
         return new JSONParser();
     }
 
-
     @Bean
     public Logger logger() {
-        Logger logger = LoggerFactory.getLogger("LogFileAnalyzer");
-        //BasicConfigurator.configure();
-   /*     ConsoleHandler handler = new ConsoleHandler();
-        //handler.setLevel(Level.ALL);
-        logger.addHandler(handler);
-        logger.setLevel(Level.INFO);*/
-        return logger;
+        return LoggerFactory.getLogger("LogFileAnalyzer");
     }
 }

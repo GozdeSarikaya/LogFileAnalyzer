@@ -2,12 +2,15 @@ package Event;
 
 public class EventLog {
 
+    //region Members
     private String id;
     private final Long duration;
     private String type;
     private String host;
     private final boolean alert;
+    //endregion
 
+    //region Constructor
     public EventLog(String id, Long duration, String type, String host, boolean alert) {
         this.id = id;
         this.duration = duration;
@@ -16,6 +19,9 @@ public class EventLog {
         this.alert = alert;
     }
 
+    //endregion
+
+    //region Getters
     public String getId() {
         return id;
     }
@@ -35,5 +41,7 @@ public class EventLog {
     public boolean isAlert() {
         return alert;
     }
+
+    //endregion
 
 }

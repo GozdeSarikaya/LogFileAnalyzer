@@ -1,6 +1,7 @@
 package Event;
 
-public interface IEventLog{
+public interface IEventLog {
 
-        boolean save(EventLog t);
+    boolean save(EventLog t);
+
 }

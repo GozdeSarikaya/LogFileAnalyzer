@@ -8,14 +8,15 @@ import java.sql.Timestamp;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EventLogFileDto {
 
-
+    //region Members
     public String id;
     public State state;
     public Timestamp timestamp;
     public String host;
     public String type;
+    //endregion
 
-
+    //region Getters-Setters
     public String getId() {
         return id;
     }
@@ -55,4 +56,7 @@ public class EventLogFileDto {
     public void setType(String type) {
         this.type = type;
     }
+
+    //endregion
+
 }

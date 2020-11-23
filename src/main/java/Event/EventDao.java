@@ -11,16 +11,21 @@ import java.sql.SQLException;
 @Component
 public class EventDao implements AutoCloseable, IEventLog {
 
+    //region Private Members
     private final Connection connection;
     private final Logger logger;
     private final static String sql = "INSERT INTO event (id, duration, type, host, alert)  VALUES (?, ?, ?, ?, ?)";
+    //endregion
 
+    //region Constructor
     @Autowired
     public EventDao(Connection connection, Logger logger) {
         this.connection = connection;
         this.logger = logger;
     }
+    //endregion
 
+    //region Public Methods
     @Override
     public boolean save(EventLog event) {
 
@@ -44,4 +49,7 @@ public class EventDao implements AutoCloseable, IEventLog {
     public void close() throws SQLException {
         connection.close();
     }
+
+    //endregion
+
 }

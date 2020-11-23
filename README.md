@@ -44,7 +44,7 @@ The program should:
   - Type and Host if applicable  
   - Alert (true if the event took longer than 4ms, otherwise false)
 
-### Project Hierarchy
+## Project Hierarchy
 
 The following files and folder are part of the project:
 
